@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.ipynb_checkpoints/
+.DS_Store
+nifty.csv
+# Generated outputs. Remove the next two lines if you want to commit your results (recommended once you have run it).
+results/*
+!results/.gitkeep

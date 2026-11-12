@@ -1,0 +1,10 @@
+numpy
+pandas>=2.0
+scipy
+scikit-learn
+statsmodels>=0.14
+arch>=6.2
+matplotlib
+yfinance
+tabulate
+pytest
