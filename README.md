@@ -92,6 +92,4 @@ src/run_all.py       pipeline and REPORT.md generator
 tests/               unit tests, look-ahead guards, end-to-end smoke test
 ```
 
-## License
 
-MIT
