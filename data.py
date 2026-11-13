@@ -5,11 +5,35 @@ import numpy as np
 import pandas as pd
 
 
-def load_nifty(start: str = "2007-09-17", end: str | None = None, csv: str | None = None) -> pd.Series:
-    """Daily NIFTY 50 close prices as a float Series with a tz-naive DatetimeIndex."""
+def validate_prices(close: pd.Series) -> dict:
+    """Data-quality report on a raw close series (before cleaning). Never modifies the data."""
+    idx = pd.DatetimeIndex(close.index)
+    gaps = idx.to_series().diff().dt.days.dropna()
+    return {
+        "n_raw": int(len(close)),
+        "n_missing_values": int(close.isna().sum()),
+        "n_duplicate_dates": int(idx.duplicated().sum()),
+        "n_nonpositive_prices": int((close <= 0).sum()),
+        "is_monotonic_increasing_dates": bool(idx.is_monotonic_increasing),
+        "n_weekend_dates": int((idx.dayofweek >= 5).sum()),
+        "max_gap_calendar_days": int(gaps.max()) if len(gaps) else 0,
+        "n_gaps_over_5_days": int((gaps > 5).sum()),
+    }
+
+
+def load_nifty(
+    start: str = "2007-09-17", end: str | None = None, csv: str | None = None, return_report: bool = False
+):
+    """Daily NIFTY 50 close prices as a float Series with a tz-naive DatetimeIndex.
+
+    Source is Yahoo Finance (^NSEI, unadjusted close; an index has no dividends/splits to adjust) or a user CSV.
+    Cleaning: drop NaN closes, drop duplicated dates (keep first), sort chronologically. Non-trading days are
+    NOT forward-filled: returns are computed between consecutive trading days. Non-positive prices raise.
+    """
     if csv:
         df = pd.read_csv(csv, parse_dates=[0], index_col=0)
         close = df["Close"] if "Close" in df.columns else df.iloc[:, 0]
+        source = f"csv:{csv}"
     else:
         import yfinance as yf
 
@@ -19,11 +43,23 @@ def load_nifty(start: str = "2007-09-17", end: str | None = None, csv: str | Non
         close = df["Close"]
         if isinstance(close, pd.DataFrame):
             close = close.iloc[:, 0]
-    close = close.dropna().astype(float)
+        source = "yahoo_finance:^NSEI"
+    close = close.astype(float)
     close.index = pd.DatetimeIndex(close.index).tz_localize(None)
+    report = validate_prices(close)
+    report["source"] = source
+    close = close.dropna()
     close = close[~close.index.duplicated()].sort_index()
+    if (close <= 0).any():
+        raise ValueError(f"{int((close <= 0).sum())} non-positive prices found; refusing to take logs. Inspect the data.")
     close.name = "close"
-    return close
+    report.update(
+        n_clean=int(len(close)),
+        first_date=str(close.index[0].date()),
+        last_date=str(close.index[-1].date()),
+        download_date_utc=pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d"),
+    )
+    return (close, report) if return_report else close
 
 
 def make_synthetic(n: int = 4000, seed: int = 0) -> pd.Series:

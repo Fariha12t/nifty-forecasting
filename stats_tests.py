@@ -66,3 +66,34 @@ def ljung_box_p(resid, lags: int = 12, model_df: int = 0) -> float:
     lags = min(lags, max(len(x) // 5, 1))
     res = acorr_ljungbox(x, lags=[lags], model_df=model_df, return_df=True)
     return float(res["lb_pvalue"].iloc[0])
+
+
+def arch_lm_p(resid, lags: int = 10) -> tuple[float, float]:
+    """ARCH-LM test on a residual series. Returns (statistic, p-value); H0: no ARCH effects."""
+    x = np.asarray(resid, dtype=float)
+    x = x[~np.isnan(x)]
+    out = het_arch(x - x.mean(), nlags=lags)
+    return float(out[0]), float(out[1])
+
+
+def ljung_box_table(x, name: str, lags=(5, 10, 20), model_df: int = 0) -> list[dict]:
+    """Ljung-Box rows (statistic, p) at several lags for a series."""
+    x = np.asarray(x, dtype=float)
+    x = x[~np.isnan(x)]
+    rows = []
+    for lag in lags:
+        if lag <= model_df or lag >= len(x) // 2:
+            continue
+        r = acorr_ljungbox(x, lags=[lag], model_df=model_df, return_df=True).iloc[0]
+        rows.append({"test": f"Ljung-Box({lag})", "series": name, "statistic": float(r["lb_stat"]), "p_value": float(r["lb_pvalue"])})
+    return rows
+
+
+def clustering_rows(ret: pd.Series) -> list[dict]:
+    """Volatility-clustering evidence: Ljung-Box on squared and absolute returns, plus ARCH-LM."""
+    x = ret.dropna().to_numpy()
+    rows = ljung_box_table(x**2, "daily squared returns") + ljung_box_table(np.abs(x), "daily absolute returns")
+    for lag in (5, 10, 20):
+        st, p = arch_lm_p(x, lag)
+        rows.append({"test": f"ARCH-LM({lag})", "series": "daily returns", "statistic": st, "p_value": p})
+    return rows

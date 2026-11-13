@@ -22,33 +22,69 @@ def _model(y: pd.Series, spec: dict):
     return arch_model(y, mean="Constant", dist="t", rescale=False, **spec)
 
 
+def fit_params(y_train: pd.Series, spec: dict) -> tuple[pd.Series, int]:
+    """Estimate parameters on y_train only. Returns (params, optimiser convergence flag)."""
+    res = _model(y_train, spec).fit(disp="off", show_warning=False)
+    return res.params, int(res.convergence_flag)
+
+
+def forecast_with_params(y: pd.Series, t: int, k: int, spec: dict, params: pd.Series) -> np.ndarray:
+    """One-step variance forecasts for positions t..t+k-1 with parameters held fixed.
+
+    The forecast for position t+j is made at origin t+j-1, so it uses only y[:t+j].
+    """
+    fixed = _model(y, spec).fix(params)
+    fc = fixed.forecast(start=y.index[t - 1], horizon=1, reindex=False)
+    return fc.variance.iloc[:k, 0].to_numpy()
+
+
 def garch_forecast_block(y: pd.Series, t: int, k: int, spec: dict):
     """Fit on y[:t]; return variance forecasts for positions t..t+k-1 plus mu and nu."""
-    res = _model(y.iloc[:t], spec).fit(disp="off", show_warning=False)
-    fixed = _model(y, spec).fix(res.params)
-    fc = fixed.forecast(start=y.index[t - 1], horizon=1, reindex=False)
-    var = fc.variance.iloc[:k, 0].to_numpy()
-    return var, float(res.params["mu"]), float(res.params["nu"])
+    params, _ = fit_params(y.iloc[:t], spec)
+    return forecast_with_params(y, t, k, spec, params), float(params["mu"]), float(params["nu"])
 
 
-def rolling_garch(y: pd.Series, name: str, init: int, refit_every: int, max_origins: int | None) -> pd.DataFrame:
+def rolling_garch(
+    y: pd.Series, name: str, init: int, refit_every: int, max_origins: int | None
+) -> tuple[pd.DataFrame, list[dict]]:
+    """Rolling-origin forecasts. Returns (forecasts, events); events logs every failure / non-convergence.
+
+    Fallback: if a re-estimation raises, or gives non-finite parameters or variances, the most recent successful
+    parameter vector is reused for that block (event "reused_previous_params"). If none exists yet, the block is
+    skipped (event "block_skipped"). Non-zero optimiser convergence flags are logged ("optimizer_nonconvergence")
+    but the fit is kept.
+    """
     spec = SPECS[name]
     n = len(y)
     start = max(init, n - max_origins) if max_origins else init
-    out = []
+    out, events, last_params = [], [], None
     for t in range(start, n, refit_every):
         k = min(refit_every, n - t)
+        ev = {"model": name, "origin_date": str(y.index[t].date())}
         try:
-            var, mu, nu = garch_forecast_block(y, t, k, spec)
-        except Exception:
-            continue
+            params, flag = fit_params(y.iloc[:t], spec)
+            var = forecast_with_params(y, t, k, spec, params)
+            if not (np.isfinite(var).all() and np.isfinite(params.to_numpy()).all()):
+                raise FloatingPointError("non-finite variance or parameters")
+            if flag:
+                events.append({**ev, "event": "optimizer_nonconvergence", "detail": f"convergence_flag={flag}"})
+            last_params = params
+        except Exception as exc:  # always recorded, never silent
+            if last_params is None:
+                events.append({**ev, "event": "block_skipped", "detail": repr(exc)[:200]})
+                continue
+            events.append({**ev, "event": "reused_previous_params", "detail": repr(exc)[:200]})
+            params = last_params
+            var = forecast_with_params(y, t, k, spec, params)
         out.append(
             pd.DataFrame(
                 {"model": name, "date": y.index[t : t + k], "actual": y.iloc[t : t + k].to_numpy(),
-                 "sigma2": var, "mu": mu, "nu": nu}
+                 "sigma2": var, "mu": float(params["mu"]), "nu": float(params["nu"])}
             )
         )
-    return pd.concat(out, ignore_index=True)
+    if not out:
+        raise RuntimeError(f"{name}: every GARCH block failed; see events: {events[:3]}")
+    return pd.concat(out, ignore_index=True), events
 
 
 def ewma_variance(y: pd.Series, lam: float = 0.94, warm: int = 30) -> pd.Series:

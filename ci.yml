@@ -18,4 +18,4 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - run: pip install -r requirements.txt
-      - run: python -m pytest -q
+      - run: python -m pytest -q   # synthetic data only; no network needed

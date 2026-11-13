@@ -14,7 +14,8 @@ def point_metrics(actual, pred, bench_pred) -> dict:
         "RMSE": float(np.sqrt(np.mean(e**2))),
         "MAE": float(np.mean(np.abs(e))),
         "OOS R2 vs hist. mean": float(1 - np.sum(e**2) / np.sum(eb**2)),
-        "Directional acc.": float(np.mean(np.sign(pred) == np.sign(actual))),
+        # A forecast of exactly 0 has no direction, so directional accuracy is undefined (NaN), not 0%.
+        "Directional acc.": float(np.mean(np.sign(pred) == np.sign(actual))) if np.any(pred != 0) else float("nan"),
     }
 
 
@@ -29,6 +30,11 @@ def interval_metrics(actual, lo, hi, level: float = 0.95) -> dict:
         "Mean width": float(width.mean()),
         "Winkler score": float(winkler.mean()),
     }
+
+
+def nw_lag(n: int) -> int:
+    """Rule-of-thumb Newey-West truncation lag, floor(n^(1/3))."""
+    return int(np.floor(n ** (1 / 3)))
 
 
 def dm_test(loss_a, loss_b, h: int = 1, max_lag: int | None = None):
@@ -54,6 +60,16 @@ def dm_test(loss_a, loss_b, h: int = 1, max_lag: int | None = None):
 
 
 # ----------------------------- volatility -----------------------------
+def vol_point_metrics(sigma2, proxy) -> dict:
+    """Variance-forecast errors against a noisy proxy (squared return). Lower is better for all three."""
+    sigma2, proxy = np.asarray(sigma2, dtype=float), np.asarray(proxy, dtype=float)
+    return {
+        "MSE (variance)": float(np.mean((sigma2 - proxy) ** 2)),
+        "MAE (sigma vs |r|)": float(np.mean(np.abs(np.sqrt(sigma2) - np.sqrt(proxy)))),
+        "QLIKE": float(np.mean(qlike(sigma2, proxy))),
+    }
+
+
 def qlike(sigma2, proxy):
     """QLIKE loss (up to a constant): robust to noise in the variance proxy (Patton, 2011)."""
     sigma2 = np.maximum(np.asarray(sigma2, dtype=float), 1e-10)

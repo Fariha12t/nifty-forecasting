@@ -22,10 +22,15 @@ MODELS = ["Zero drift", "Historical mean", "ARIMA", "SARIMA", "ETS", "Gradient b
 
 
 # ----------------------------- model selection (first training window only) -----------------------------
+WARN_COUNTS = {"sarimax": 0, "ets": 0}  # statsmodels warnings are counted and reported, not hidden
+
+
 def _fit_sarimax(y, order, seasonal):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        return SARIMAX(y, order=order, seasonal_order=seasonal, trend="c").fit(disp=False)
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        res = SARIMAX(y, order=order, seasonal_order=seasonal, trend="c").fit(disp=False)
+    WARN_COUNTS["sarimax"] += len(w)
+    return res
 
 
 def select_arima(y: np.ndarray, seasonal: bool) -> tuple[tuple, tuple]:
@@ -58,11 +63,13 @@ ETS_CONFIGS = {
 
 
 def _fit_ets(level: np.ndarray, cfg: dict):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
         level = pd.Series(np.asarray(level, dtype=float))  # ETS prediction needs a pandas index
         mod = ETSModel(level, error="add", seasonal_periods=S if cfg["seasonal"] else None, **cfg)
-        return mod.fit(disp=False, maxiter=200)
+        res = mod.fit(disp=False, maxiter=200)
+    WARN_COUNTS["ets"] += len(w)
+    return res
 
 
 def select_ets(level: np.ndarray) -> str:
@@ -126,7 +133,9 @@ def rolling_origin(
 
     feats = make_features(r)
     feat_arr = feats.to_numpy()
-    rows, fails = [], {"ARIMA": 0, "SARIMA": 0, "ETS": 0}
+    rows, fails, reasons = [], {"ARIMA": 0, "SARIMA": 0, "ETS": 0}, []
+    WARN_COUNTS.update(sarimax=0, ets=0)
+    np.random.seed(0)
 
     def add(model, i, pred, lo, hi):
         rows.append((model, r.index[i], r_arr[i], pred, lo, hi))
@@ -142,16 +151,18 @@ def rolling_origin(
             try:
                 fc = _fit_sarimax(train, order, sorder).get_forecast(1).summary_frame(alpha=0.05).iloc[0]
                 add(name, i, fc["mean"], fc["mean_ci_lower"], fc["mean_ci_upper"])
-            except Exception:
+            except Exception as exc:
                 fails[name] += 1
+                reasons.append({"model": name, "date": str(r.index[i].date()), "reason": repr(exc)[:200]})
                 add(name, i, mu_hat, mu_hat - w, mu_hat + w)
 
         try:
             res = _fit_ets(lp_arr[: i + 1], ets_cfg)
             fc = res.get_prediction(start=i + 1, end=i + 1).summary_frame(alpha=0.05).iloc[0]
             add("ETS", i, fc["mean"] - lp_arr[i], fc["pi_lower"] - lp_arr[i], fc["pi_upper"] - lp_arr[i])
-        except Exception:
+        except Exception as exc:
             fails["ETS"] += 1
+            reasons.append({"model": "ETS", "date": str(r.index[i].date()), "reason": repr(exc)[:200]})
             add("ETS", i, mu_hat, mu_hat - w, mu_hat + w)
 
         # ML: training rows t = 0..i-2 (target r[t+1] <= r[i-1]); predict from row i-1
@@ -167,10 +178,14 @@ def rolling_origin(
             lo, hi = float(lo_m.predict(x_new)[0]), float(hi_m.predict(x_new)[0])
             add("Gradient boosting", i, p, min(lo, p), max(hi, p))
         else:
+            fails["Gradient boosting"] = fails.get("Gradient boosting", 0) + 1
+            reasons.append({"model": "Gradient boosting", "date": str(r.index[i].date()), "reason": "too few complete training rows"})
             add("Gradient boosting", i, mu_hat, mu_hat - w, mu_hat + w)
 
     out = pd.DataFrame(rows, columns=["model", "date", "actual", "pred", "lo", "hi"])
     spec["fit_failures"] = fails
+    spec["fit_failure_reasons"] = reasons
+    spec["fit_warnings"] = dict(WARN_COUNTS)
     n_orig = n - start
     bad = {k: v for k, v in fails.items() if v > 0.1 * n_orig}
     if bad:
