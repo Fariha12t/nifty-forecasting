@@ -1,6 +1,6 @@
 # Forecasting and Volatility Analysis of the NIFTY 50
 
-![tests](https://github.com/Fariha12t/nifty-forecasting/actions/workflows/ci.yml/badge.svg)
+
 
 A reproducible time-series study of India's NIFTY 50 index, built to answer two questions honestly rather than to "beat the market". **Headline result:** monthly returns were not forecastable beyond a constant mean, but daily volatility and tail risk were (see section 8).
 
