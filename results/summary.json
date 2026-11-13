@@ -1,0 +1,21 @@
+{
+  "data": "NIFTY 50 (^NSEI, Yahoo Finance)",
+  "best_mean_model_by_rmse": "Historical mean",
+  "best_vol_model_by_qlike": "EGARCH(1,1)-t",
+  "selected_specs": {
+    "ARIMA": "ARIMA(0, 0, 0) + constant",
+    "SARIMA": "SARIMA(0, 0, 0)x(1, 0, 1, 12)",
+    "ETS": "ETS(A,N,N)",
+    "fit_failures": {
+      "ARIMA": 0,
+      "SARIMA": 0,
+      "ETS": 0
+    },
+    "fit_failure_reasons": [],
+    "fit_warnings": {
+      "sarimax": 0,
+      "ets": 0
+    }
+  },
+  "n_garch_fallback_events": 0
+}

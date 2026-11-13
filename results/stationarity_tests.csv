@@ -1,0 +1,5 @@
+series,n,ADF stat,ADF p,KPSS stat,KPSS p,verdict
+Log price (daily),4700,-0.3033,0.925,10.8228,0.01,non-stationary (unit root)
+Daily log returns,4699,-14.6041,0.0,0.0387,0.1,stationary
+Monthly log price,230,-0.4595,0.8997,2.2962,0.01,non-stationary (unit root)
+Monthly log returns,229,-15.3777,0.0,0.0573,0.1,stationary

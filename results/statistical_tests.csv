@@ -1,0 +1,76 @@
+category,test,series,statistic,p_value,detail
+stationarity,ADF (H0: unit root),Log price (daily),-0.3032615279999338,0.925041130337279,non-stationary (unit root)
+stationarity,KPSS (H0: stationary),Log price (daily),10.82277514155179,0.01,non-stationary (unit root)
+stationarity,ADF (H0: unit root),Daily log returns,-14.604089347582631,4.121356150529243e-27,stationary
+stationarity,KPSS (H0: stationary),Daily log returns,0.03870697190261353,0.1,stationary
+stationarity,ADF (H0: unit root),Monthly log price,-0.45951382884029196,0.8996779150168885,non-stationary (unit root)
+stationarity,KPSS (H0: stationary),Monthly log price,2.2962045111926677,0.01,non-stationary (unit root)
+stationarity,ADF (H0: unit root),Monthly log returns,-15.377708415794961,3.440576693737709e-28,stationary
+stationarity,KPSS (H0: stationary),Monthly log returns,0.05732864282150229,0.1,stationary
+descriptive,n,daily returns,4699.0,,
+descriptive,mean,daily returns,0.03664063594167863,,
+descriptive,std,daily returns,1.2916117791818846,,
+descriptive,skew,daily returns,-0.2788852461098924,,
+descriptive,excess kurtosis,daily returns,15.147553339821965,,
+distribution/dependence,Jarque-Bera p,daily returns,,0.0,
+distribution/dependence,"Ljung-Box(10) p, returns",daily returns,,2.5031773542499096e-05,
+distribution/dependence,"Ljung-Box(10) p, squared returns",daily returns,,0.0,
+distribution/dependence,ARCH-LM(10) p,daily returns,,1.2150803782582558e-135,
+descriptive,n,monthly returns,229.0,,
+descriptive,mean,monthly returns,0.6655464595601387,,
+descriptive,std,monthly returns,5.970497226769139,,
+descriptive,skew,monthly returns,-0.8839213427417567,,
+descriptive,excess kurtosis,monthly returns,5.590884543063259,,
+distribution/dependence,Jarque-Bera p,monthly returns,,5.750774764112031e-72,
+distribution/dependence,"Ljung-Box(10) p, returns",monthly returns,,0.9197294836192349,
+distribution/dependence,"Ljung-Box(10) p, squared returns",monthly returns,,4.448090755945681e-05,
+distribution/dependence,ARCH-LM(10) p,monthly returns,,9.902907932659922e-05,
+volatility clustering,Ljung-Box(5),daily squared returns,838.7208746061809,4.851473066341845e-179,
+volatility clustering,Ljung-Box(10),daily squared returns,1644.8122170062843,0.0,
+volatility clustering,Ljung-Box(20),daily squared returns,2149.3064761480223,0.0,
+volatility clustering,Ljung-Box(5),daily absolute returns,2044.3108812568626,0.0,
+volatility clustering,Ljung-Box(10),daily absolute returns,3934.4583090956125,0.0,
+volatility clustering,Ljung-Box(20),daily absolute returns,6296.344085925822,0.0,
+volatility clustering,ARCH-LM(5),daily returns,490.99776326439337,7.00292218383667e-104,
+volatility clustering,ARCH-LM(10),daily returns,661.3860356650356,1.2150803782582558e-135,
+volatility clustering,ARCH-LM(20),daily returns,674.5860877078621,5.242100739763375e-130,
+residual diagnostics,Ljung-Box(6),ARIMA residuals,5.646349901496351,0.46394771843107263,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(12),ARIMA residuals,11.462111900079085,0.48978466444027113,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(24),ARIMA residuals,20.019836164098297,0.6956475418412802,"in-sample, full-sample fit"
+residual diagnostics,ARCH-LM(6),ARIMA residuals,12.057144393360883,0.06070605754360719,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(6),SARIMA residuals,7.266772475646819,0.2968793610570556,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(12),SARIMA residuals,13.964725984513674,0.3029664890481233,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(24),SARIMA residuals,25.123745896891982,0.39906117135785707,"in-sample, full-sample fit"
+residual diagnostics,ARCH-LM(6),SARIMA residuals,15.569444792427664,0.016261313523623838,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(5),"EGARCH(1,1)-t std. residuals",22.632548876502508,0.0003967655593627379,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(10),"EGARCH(1,1)-t std. residuals",28.93162231038902,0.0012782006512147273,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(20),"EGARCH(1,1)-t std. residuals",37.72667600410245,0.009561494931152263,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(5),"EGARCH(1,1)-t squared std. residuals",11.885824486111291,0.0363861872044058,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(10),"EGARCH(1,1)-t squared std. residuals",15.29823000633131,0.1215613029419213,"in-sample, full-sample fit"
+residual diagnostics,Ljung-Box(20),"EGARCH(1,1)-t squared std. residuals",22.23314860006983,0.32799457536521626,"in-sample, full-sample fit"
+residual diagnostics,ARCH-LM(10),"EGARCH(1,1)-t std. residuals",15.818850073647166,0.10493677811006731,"in-sample, full-sample fit"
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",Zero drift vs Historical mean,1.0319046504506046,0.30400375407944,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",Zero drift vs ARIMA,1.0319046504506053,0.3040037540794396,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",Zero drift vs SARIMA,-0.2194983790559836,0.8266009060155595,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",Zero drift vs ETS,-0.8641432040633353,0.3890768038990595,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",Zero drift vs Gradient boosting,-1.7779700533159197,0.07771119637621982,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",Historical mean vs ARIMA,1.624407038717469e-07,0.9999998706363071,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",Historical mean vs SARIMA,-1.1071130829945404,0.27025846768952877,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",Historical mean vs ETS,-1.0422575238805882,0.29919743178592473,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",Historical mean vs Gradient boosting,-1.8727075797551538,0.06332079594018603,negative = A has lower loss; Holm-adjusted p=0.9498
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",ARIMA vs SARIMA,-1.1071130829945404,0.27025846768952877,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",ARIMA vs ETS,-1.0422575238805885,0.29919743178592473,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",ARIMA vs Gradient boosting,-1.8727075797551538,0.06332079594018603,negative = A has lower loss; Holm-adjusted p=0.9498
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",SARIMA vs ETS,0.2057624998480232,0.8372934352481778,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",SARIMA vs Gradient boosting,-1.6679390714576219,0.09769840644044359,negative = A has lower loss; Holm-adjusted p=1
+DM monthly (squared error),"Diebold-Mariano (Newey-West, HLN)",ETS vs Gradient boosting,-1.778836655255837,0.0775682679527201,negative = A has lower loss; Holm-adjusted p=1
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)","GARCH(1,1)-t vs GJR-GARCH(1,1)-t",1.5525234705629478,0.12063597153411942,negative = A has lower QLIKE; Holm-adjusted p=0.3619
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)","GARCH(1,1)-t vs EGARCH(1,1)-t",1.5486379669935313,0.12156772182625475,negative = A has lower QLIKE; Holm-adjusted p=0.3619
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)","GARCH(1,1)-t vs EWMA (0.94)",-2.9259088621867275,0.003458701164700706,negative = A has lower QLIKE; Holm-adjusted p=0.03459
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)","GARCH(1,1)-t vs Rolling 250d",-2.6928379817301193,0.007121619776985222,negative = A has lower QLIKE; Holm-adjusted p=0.03591
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)","GJR-GARCH(1,1)-t vs EGARCH(1,1)-t",0.1688974080545954,0.8658880193849197,negative = A has lower QLIKE; Holm-adjusted p=0.8659
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)","GJR-GARCH(1,1)-t vs EWMA (0.94)",-2.870731353512276,0.0041221428390203485,negative = A has lower QLIKE; Holm-adjusted p=0.03591
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)","GJR-GARCH(1,1)-t vs Rolling 250d",-2.788044325698228,0.0053340717551528805,negative = A has lower QLIKE; Holm-adjusted p=0.03591
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)","EGARCH(1,1)-t vs EWMA (0.94)",-2.881016790453336,0.003990332035964439,negative = A has lower QLIKE; Holm-adjusted p=0.03591
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)","EGARCH(1,1)-t vs Rolling 250d",-2.8673951793129984,0.004165738354328097,negative = A has lower QLIKE; Holm-adjusted p=0.03591
+DM volatility (QLIKE),"Diebold-Mariano (Newey-West, HLN)",EWMA (0.94) vs Rolling 250d,-2.469365338647839,0.013587163612196473,negative = A has lower QLIKE; Holm-adjusted p=0.05435

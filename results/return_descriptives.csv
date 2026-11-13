@@ -1,0 +1,10 @@
+,value
+n,4699.0
+mean,0.03664063594167863
+std,1.2916117791818846
+skew,-0.2788852461098924
+excess kurtosis,15.147553339821965
+Jarque-Bera p,0.0
+"Ljung-Box(10) p, returns",2.5031773542499096e-05
+"Ljung-Box(10) p, squared returns",0.0
+ARCH-LM(10) p,1.2150803782582558e-135
